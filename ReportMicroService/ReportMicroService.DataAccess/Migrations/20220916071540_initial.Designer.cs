@@ -12,7 +12,7 @@ using ReportMicroService.DataAccess;
 namespace ReportMicroService.DataAccess.Migrations
 {
     [DbContext(typeof(ReportServiceDbContext))]
-    [Migration("20220915191050_initial")]
+    [Migration("20220916071540_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
