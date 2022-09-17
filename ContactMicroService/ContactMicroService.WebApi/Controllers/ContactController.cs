@@ -53,7 +53,6 @@ namespace ContactMicroService.WebApi.Controllers
                 _logger.LogError(ex.Message);
                 return new Response<Contact>().NotFound("Unhandled Exception.");
             }
-
         }
 
 
@@ -81,7 +80,6 @@ namespace ContactMicroService.WebApi.Controllers
                 if (id != 0)
                 {
                     var deleteData = await _contactService.GetContactById(id);
-
                     await _contactService.DeleteContact(deleteData);
                 }
 
@@ -90,15 +88,12 @@ namespace ContactMicroService.WebApi.Controllers
             {
                 _logger.LogError(ex.Message);
             }
-
-
         }
 
         [HttpGet("[action]")]
         public async Task<ContactReport> GetContactReportByLocation(string Location)
         {
             return await _contactService.GetReportData(Location);
-
         }
     }
 }

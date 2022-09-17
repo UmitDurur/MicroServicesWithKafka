@@ -14,7 +14,6 @@ namespace ContactMicroService.DataAccess.Repositories
     {
         public ContactRepository(ContactServiceDBContext context):base(context)
         {
-
         }
 
         public Task<ContactReport> GetContactReport()
