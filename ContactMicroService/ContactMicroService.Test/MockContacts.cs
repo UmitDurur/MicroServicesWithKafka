@@ -13,6 +13,7 @@ namespace ContactMicroService.Test
         private readonly List<Contact> contactList;
         public MockContacts()
         {
+            var inf =
             contactList = new List<Contact>
             {
             new Contact
@@ -20,21 +21,39 @@ namespace ContactMicroService.Test
                 ContactId=1,
                 FirstName = "Jhon",
                 LastName = "Doe",
-                Company="Corp"
+                Company="Corp",
+                ContactInfos=new []{new ContactInfo
+                {
+                    ContactType = Entities.Enums.ContactType.Location,
+                    Information = "Hatay"
+                },new ContactInfo{
+                 ContactType = Entities.Enums.ContactType.PhoneNumber,
+                    Information = "123123124123"
+                } },
             },
             new Contact
             {
                 ContactId = 2,
                 FirstName = "Jhon1",
                 LastName = "Doe1",
-                Company="Corp1"
+                Company="Corp1",
+                 ContactInfos=new []{new ContactInfo
+                {
+                    ContactType = Entities.Enums.ContactType.Location,
+                    Information = "Hatay"
+                } },
             },
             new Contact
             {
                 ContactId=3,
                 FirstName = "Jhon2",
                 LastName = "Doe2",
-                Company="Corp2"
+                Company="Corp2",
+                           ContactInfos=new []{new ContactInfo
+                {
+                    ContactType = Entities.Enums.ContactType.Location,
+                    Information = "Adana"
+                } },
             }
             };
         }
