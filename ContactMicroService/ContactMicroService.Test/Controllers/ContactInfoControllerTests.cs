@@ -46,6 +46,35 @@ namespace ContactMicroService.Test.Controllers
             Assert.Equal(HttpStatusCode.OK, statusCode);
             Assert.Equal(contactInfos.Count(), actual.Count());
         }
+        [Fact]
+        public void GetContactInfo_ListOfContactInfo_ContactInfoIfNotExistsInRepo()
+        {
+            _contactInfoService.Setup(x => x.GetAllContactInfos())
+                .ReturnsAsync((List<ContactInfo>)null);
+            var controller = new ContactInfoController(_contactInfoService.Object, logger.Object);
+
+            var actionResult = controller.GetAllData();
+            var result = actionResult.Result;
+            var statusCode = result.Code;
+            var actual = result.Data as IEnumerable<ContactInfo>;
+
+            Assert.Equal(HttpStatusCode.NotFound, statusCode);
+        }
+
+        [Fact]
+        public void GetContactInfo_ListOfContactInfo_ContactInfoIfNotExistsInRepoIsNotDeleted()
+        {
+            _contactInfoService.Setup(x => x.GetDeleteFilteredAllContactInfos())
+                .ReturnsAsync((List<ContactInfo>)null);
+            var controller = new ContactInfoController(_contactInfoService.Object, logger.Object);
+
+            var actionResult = controller.GetDeleteFilteredAllData();
+            var result = actionResult.Result;
+            var statusCode = result.Code;
+            var actual = result.Data as IEnumerable<ContactInfo>;
+
+            Assert.Equal(HttpStatusCode.NotFound, statusCode);
+        }
 
         [Fact]
         public void GetContact_GetById_ContactInfoExistInRepo()

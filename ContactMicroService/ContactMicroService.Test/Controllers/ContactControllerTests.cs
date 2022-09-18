@@ -48,6 +48,22 @@ namespace ContactMicroService.Test.Controllers
         }
 
         [Fact]
+        public void GetContact_ListOfContact_ContactIfNotExistsInRepo()
+        {
+            _contactService.Setup(x => x.GetAllContacts())
+                .ReturnsAsync((List<Contact>) null);
+            var controller = new ContactController(_contactService.Object, logger.Object);
+
+            var actionResult = controller.GetAllData();
+            var result = actionResult.Result;
+            var statusCode = result.Code;
+            var actual = result.Data as IEnumerable<Contact>;
+
+            Assert.Equal(HttpStatusCode.NotFound, statusCode);
+        }
+
+
+        [Fact]
         public void GetFilteredContact_ListOfContact_ContactExistsInRepoIsNotDeleted()
         {
             var contacts = _mockContact.GetContacts();
@@ -63,6 +79,21 @@ namespace ContactMicroService.Test.Controllers
             Assert.Equal(HttpStatusCode.OK, statusCode);
             Assert.Equal(_mockContact.GetContacts().Count(), actual.Count());
         }
+        [Fact]
+        public void GetContact_ListOfContact_ContactIfNotExistsInRepoIsNotDeleted()
+        {
+            _contactService.Setup(x => x.GetDeleteFilteredAllContacts())
+                .ReturnsAsync((List<Contact>)null);
+            var controller = new ContactController(_contactService.Object, logger.Object);
+
+            var actionResult = controller.GetDeleteFilteredAllData();
+            var result = actionResult.Result;
+            var statusCode = result.Code;
+            var actual = result.Data as IEnumerable<Contact>;
+
+            Assert.Equal(HttpStatusCode.NotFound, statusCode);
+        }
+
 
         [Fact]
         public void GetContact_GetById_ContactExistInRepo()
@@ -167,5 +198,20 @@ namespace ContactMicroService.Test.Controllers
             Assert.Equal(newContact, result.Data);
 
         }
+
+        public void DeleteContact_DeletedStatus_PassingContactIdToDelete()
+        {
+            var contacts = _mockContact.GetContacts();
+            var deleteContact = contacts[0];
+            
+            var controller = new ContactController(_contactService.Object, logger.Object);
+            var actionResult = controller.Delete(deleteContact.ContactId);
+            var result = actionResult.Result;
+            
+            Assert.Equal(HttpStatusCode.OK, result.Code);
+
+        }
+
+
     }
 }

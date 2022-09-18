@@ -13,7 +13,6 @@ namespace ContactMicroService.Test
         private readonly List<Contact> contactList;
         public MockContacts()
         {
-            var inf =
             contactList = new List<Contact>
             {
             new Contact
@@ -22,6 +21,7 @@ namespace ContactMicroService.Test
                 FirstName = "Jhon",
                 LastName = "Doe",
                 Company="Corp",
+                IsDeleted=false,
                 ContactInfos=new []{new ContactInfo
                 {
                     ContactType = Entities.Enums.ContactType.Location,
@@ -37,6 +37,7 @@ namespace ContactMicroService.Test
                 FirstName = "Jhon1",
                 LastName = "Doe1",
                 Company="Corp1",
+                IsDeleted=false,
                  ContactInfos=new []{new ContactInfo
                 {
                     ContactType = Entities.Enums.ContactType.Location,
@@ -48,6 +49,7 @@ namespace ContactMicroService.Test
                 ContactId=3,
                 FirstName = "Jhon2",
                 LastName = "Doe2",
+                IsDeleted=false,
                 Company="Corp2",
                            ContactInfos=new []{new ContactInfo
                 {
