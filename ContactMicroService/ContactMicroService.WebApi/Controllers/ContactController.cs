@@ -107,7 +107,7 @@ namespace ContactMicroService.WebApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return new Response<Contact>().Error(1,null,"Delete contact failed");
+                return new Response<Contact>().NotFound("Delete contact failed");
             }
         }
 

@@ -11,6 +11,7 @@ using ContactMicroService.WebApi.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,14 +35,12 @@ namespace ContactMicroService.Test.Services
         {
             var contacts = _mockContacts.GetContacts();
             var mockLogger = new Mock<ILogger<IContactService>>();
-            var mockRepo = new Mock<IContactRepository>();
-            mockRepo.Setup(x => x.GetAllAsync()).ReturnsAsync(contacts);
             var mockUoW = new Mock<IUnitOfWork>();
-            mockUoW.Setup(x => x.Contact.GetAllAsync()).Returns(mockRepo.Object.GetAllAsync());
+            mockUoW.Setup(x => x.Contact.GetAllAsync()).ReturnsAsync(contacts);
             var contactServ = new ContactService(mockUoW.Object);
             var result = await contactServ.GetAllContacts();
             var count = result.Count();
-            mockRepo.Verify(x => x.GetAllAsync(), Times.Once);
+            mockUoW.Verify(x => x.Contact.GetAllAsync(), Times.Once);
             Assert.Equal(contacts.Count, count);
         }
 
@@ -107,11 +106,10 @@ namespace ContactMicroService.Test.Services
         [Fact]
         public void GetContactReportByLocation_ContactReportObject_ContactwithSpecifiedInfoLocation()
         {
-            var contacts=_mockContacts.GetContacts();
+            var contacts = _mockContacts.GetContacts();
             var mockLogger = new Mock<ILogger<IContactService>>();
-            var mockRepo = new Mock<IContactRepository>();
             var mockUoW = new Mock<IUnitOfWork>();
-            var filteredContact = new List<Contact>{ contacts[0], contacts[1] };
+            var filteredContact = new List<Contact> { contacts[0], contacts[1] };
             var query = filteredContact.AsQueryable();
 
             string Location = "Hatay";
@@ -123,14 +121,14 @@ namespace ContactMicroService.Test.Services
                 predicate = predicate.And(i => i.Information == Location);
             }
 
-            var reportData = new ContactReport { Location=Location,NearbyPeopleCount=2,NearbySavedPhoneCount=1};
+            var reportData = new ContactReport { Location = Location, NearbyPeopleCount = 2, NearbySavedPhoneCount = 1 };
 
-            mockRepo.Setup(x => x.FindByContactInfo(predicate)).ReturnsAsync(query);
-            mockUoW.Setup(x => x.Contact.FindByContactInfo(predicate)).Returns(mockRepo.Object.FindByContactInfo(predicate));
+            mockUoW.Setup(x => x.Contact.FindByContactInfo(It.IsAny<Expression<Func<ContactInfo,bool>>>())).ReturnsAsync(query);
             var contactServ = new ContactService(mockUoW.Object);
             var result = contactServ.GetReportData(Location).Result;
-            mockRepo.Verify(x => x.FindByContactInfo(predicate), Times.Once);
-            Assert.Equal(reportData,result);
+            var serializedResult= JsonConvert.SerializeObject(result);
+            var serializedReportData = JsonConvert.SerializeObject(reportData);
+            Assert.Equal(serializedReportData,serializedResult);
         }
     }
 }

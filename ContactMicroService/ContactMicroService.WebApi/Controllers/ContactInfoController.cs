@@ -89,19 +89,25 @@ namespace ContactMicroService.WebApi.Controllers
         }
 
         [HttpPost("[action]/{id}")]
-        public async Task Delete(int id)
+        public async Task<Response<Contact>> Delete(int id)
         {
             try
             {
                 if (id != 0)
                 {
                     var deleteData = await _contactInfoService.GetContactInfoById(id);
-                    deleteData.IsDeleted=true;
+                    deleteData.IsDeleted = true;
                     await _contactInfoService.UpdateContactInfo(deleteData);
+                    return new Response<Contact>().Ok(1, null);
                 }
+
+                return new Response<Contact>().NotFound("Contact info can not found");
+
             }
-            catch (Exception ex) { 
+            catch (Exception ex)
+            {
                 _logger.LogError(ex.Message);
+                return new Response<Contact>().NotFound( "Delete contact info failed");
             }
         }
 
