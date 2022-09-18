@@ -32,6 +32,22 @@ namespace ContactMicroService.WebApi.Controllers
             }
         }
 
+        [HttpGet("[action]")]
+        public async Task<Response<IEnumerable<Contact>>> GetDeleteFilteredAllData()
+        {
+            try
+            {
+                var contacts = await _contactService.GetDeleteFilteredAllContacts();
+                return new Response<IEnumerable<Contact>>().Ok(contacts.Count(), contacts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return new Response<IEnumerable<Contact>>().NotFound("Contact cannot found.");
+            }
+        }
+
+
         [HttpPost("[action]/{id}")]
         public async Task<Response<Contact>> GetById(int id)
         {
@@ -80,7 +96,8 @@ namespace ContactMicroService.WebApi.Controllers
                 if (id != 0)
                 {
                     var deleteData = await _contactService.GetContactById(id);
-                    await _contactService.DeleteContact(deleteData);
+                    deleteData.IsDeleted = true;
+                    await _contactService.UpdateContact(deleteData);
                 }
 
             }

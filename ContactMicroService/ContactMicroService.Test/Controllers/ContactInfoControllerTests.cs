@@ -116,21 +116,7 @@ namespace ContactMicroService.Test.Controllers
             Assert.Equal(HttpStatusCode.OK, result.Code);
             Assert.Equal(newContactInfo, result.Data);
         }
-        [Fact]
-        public async void DeleteContactInfo_DeletedStatus_PassingDeleteIdToDelete()
-        {
-            var ContactInfos = _mockContactInfo.GetContactInfos();
-            var deleteContactInfo = ContactInfos[0];
-            var id = 1;
-            _contactInfoService.Setup(c => c.GetContactInfoById(id)).ReturnsAsync(deleteContactInfo);
-            _contactInfoService.Setup(c => c.DeleteContactInfo(It.IsAny<ContactInfo>())).Returns(Task.CompletedTask);
 
-            var controller = new ContactInfoController(_contactInfoService.Object, logger.Object);
-            await controller.Delete(1);
-
-            _contactInfoService.Verify(c => c.DeleteContactInfo(It.IsAny<ContactInfo>()), Times.Once);
-
-        }
 
         [Fact]
         public void UpdateContact_UpdatedStatus_PassingContactObjectToUpdate()

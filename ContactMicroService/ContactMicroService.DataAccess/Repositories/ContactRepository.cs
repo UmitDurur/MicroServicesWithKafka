@@ -24,5 +24,10 @@ namespace ContactMicroService.DataAccess.Repositories
         {
             return _context.Contacts.Where(i=>i.ContactInfos.AsQueryable().Any(predicate));
         }
+
+        public async Task<IEnumerable<Contact>> GetDeleteFilteredAll()
+        {
+            return await _context.Contacts.Where(c => c.IsDeleted == false).ToListAsync();
+        }
     }
 }

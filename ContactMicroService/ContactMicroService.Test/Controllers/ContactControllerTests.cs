@@ -48,6 +48,23 @@ namespace ContactMicroService.Test.Controllers
         }
 
         [Fact]
+        public void GetFilteredContact_ListOfContact_ContactExistsInRepoIsNotDeleted()
+        {
+            var contacts = _mockContact.GetContacts();
+            _contactService.Setup(x => x.GetDeleteFilteredAllContacts())
+                .ReturnsAsync(contacts);
+            var controller = new ContactController(_contactService.Object, logger.Object);
+
+            var actionResult = controller.GetDeleteFilteredAllData();
+            var result = actionResult.Result;
+            var statusCode = result.Code;
+            var actual = result.Data as IEnumerable<Contact>;
+
+            Assert.Equal(HttpStatusCode.OK, statusCode);
+            Assert.Equal(_mockContact.GetContacts().Count(), actual.Count());
+        }
+
+        [Fact]
         public void GetContact_GetById_ContactExistInRepo()
         {
             var contacts = _mockContact.GetContacts();
@@ -115,24 +132,10 @@ namespace ContactMicroService.Test.Controllers
             Assert.Equal(HttpStatusCode.OK, result.Code);
             Assert.Equal(newContact,result.Data);
         }
-        [Fact]
-        public async void DeleteContact_DeletedStatus_PassingDeleteIdToDelete()
-        {
-            var contacts = _mockContact.GetContacts();
-            var deleteContact = contacts[0];
-            var id = 1;
-            _contactService.Setup(c => c.GetContactById(id)).ReturnsAsync(deleteContact);
-            _contactService.Setup(c => c.DeleteContact(It.IsAny<Contact>())).Returns(Task.CompletedTask);
-
-            var controller = new ContactController(_contactService.Object, logger.Object);
-            await controller.Delete(1);
-
-            _contactService.Verify(c => c.DeleteContact(It.IsAny<Contact>()), Times.Once);
-
-        }
+  
 
         [Fact]
-        public async void GetContactByLocation_ContactObject_ContactwithSpecifiedInfoLocation()
+        public async void GetContactReportByLocation_ContactReportObject_ContactwithSpecifiedInfoLocation()
         {
             string location = "Hatay";
             var contacts = _mockContact.GetContacts();

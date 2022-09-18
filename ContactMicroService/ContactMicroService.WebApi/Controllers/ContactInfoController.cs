@@ -79,8 +79,8 @@ namespace ContactMicroService.WebApi.Controllers
                 if (id != 0)
                 {
                     var deleteData = await _contactInfoService.GetContactInfoById(id);
-
-                    await _contactInfoService.DeleteContactInfo(deleteData);
+                    deleteData.IsDeleted=true;
+                    await _contactInfoService.UpdateContactInfo(deleteData);
                 }
             }
             catch (Exception ex) { 
