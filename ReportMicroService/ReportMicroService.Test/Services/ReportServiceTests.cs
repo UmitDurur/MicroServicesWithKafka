@@ -28,7 +28,7 @@ namespace ReportMicroService.Test.Services
             var mockLogger = new Mock<ILogger<IReportService>>();
             var mockUoW = new Mock<IUnitOfWork>();
             mockUoW.Setup(x => x.Report.GetAllAsync()).ReturnsAsync(reports);
-            var reportServ = new ReportService(mockUoW.Object,mockLogger.Object);
+            var reportServ = new ReportService(mockUoW.Object, mockLogger.Object);
             var result = await reportServ.GetAllReports();
             var count = result.Count();
             mockUoW.Verify(x => x.Report.GetAllAsync(), Times.Once);
@@ -42,7 +42,7 @@ namespace ReportMicroService.Test.Services
             var mockLogger = new Mock<ILogger<IReportService>>();
             var mockUoW = new Mock<IUnitOfWork>();
             mockUoW.Setup(x => x.Report.GetDeleteFilteredAll()).ReturnsAsync(reports);
-            var reportServ = new ReportService(mockUoW.Object,mockLogger.Object);
+            var reportServ = new ReportService(mockUoW.Object, mockLogger.Object);
             var result = await reportServ.GetDeleteFilteredAllReports();
             var count = result.Count();
             mockUoW.Verify(x => x.Report.GetDeleteFilteredAll(), Times.Once);
@@ -58,7 +58,7 @@ namespace ReportMicroService.Test.Services
             int id = 1;
 
             mockUoW.Setup(x => x.Report.GetByIdAsync(id)).Returns(mockRepo.Object.GetByIdAsync(id));
-            var reportServ = new ReportService(mockUoW.Object,mockLogger.Object);
+            var reportServ = new ReportService(mockUoW.Object, mockLogger.Object);
             var result = reportServ.GetReportById(id).Result;
             mockRepo.Verify(x => x.GetByIdAsync(id), Times.Once);
         }
@@ -73,7 +73,7 @@ namespace ReportMicroService.Test.Services
             var mockRepo = new Mock<IReportRepository>();
             var mockUoW = new Mock<IUnitOfWork>();
             mockUoW.Setup(x => x.Report.AddAsync(newReport)).Returns(mockRepo.Object.AddAsync(newReport));
-            var reportServ = new ReportService(mockUoW.Object,mockLogger.Object);
+            var reportServ = new ReportService(mockUoW.Object, mockLogger.Object);
             var result = await reportServ.CreateReport(newReport);
             mockRepo.Verify(x => x.AddAsync(newReport), Times.Once);
         }
@@ -88,9 +88,25 @@ namespace ReportMicroService.Test.Services
             var mockUoW = new Mock<IUnitOfWork>();
             var report = reports[0];
             mockUoW.Setup(x => x.Report.Update(report));
-            var reportServ = new ReportService(mockUoW.Object,mockLogger.Object);
+            var reportServ = new ReportService(mockUoW.Object, mockLogger.Object);
             var result = reportServ.UpdateReport(report);
             mockUoW.Verify(x => x.Report.Update(report), Times.Once);
         }
+
+        [Fact]
+        public async Task SendKafka_ContactReportObject_CreateReportRequest()
+        {
+            string Location = "Hatay";
+            var mockLogger = new Mock<ILogger<IReportService>>();
+            var mockRepo = new Mock<IReportRepository>();
+            var mockUoW = new Mock<IUnitOfWork>();
+            mockUoW.Setup(x => x.Report.AddAsync(It.IsAny<Report>())).ReturnsAsync(new Report());
+            var reportServ = new ReportService(mockUoW.Object, mockLogger.Object);
+            var result = await reportServ.RequestReport(Location);
+            mockUoW.Verify(x => x.Report.AddAsync(It.IsAny<Report>()), Times.Once);
+            Assert.NotNull(result);
+        }
+
+        
     }
 }
