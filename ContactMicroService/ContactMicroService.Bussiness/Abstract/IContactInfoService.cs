@@ -12,7 +12,7 @@ namespace ContactMicroService.Bussiness.Abstract
     {
         Task<IEnumerable<ContactInfo>> GetAllContactInfos();
 
-        Task<IEnumerable<ContactInfo>> GetDeleteFilteredAllContacts();
+        Task<IEnumerable<ContactInfo>> GetDeleteFilteredAllContactInfos();
         Task<ContactInfo> GetContactInfoById(int id);
         Task<ContactInfo> CreateContactInfo(ContactInfo info);
         Task UpdateContactInfo(ContactInfo info);

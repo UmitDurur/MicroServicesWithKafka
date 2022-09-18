@@ -38,7 +38,7 @@ namespace ContactMicroService.Bussiness.Concrete
             _unitOfWork.ContactInfo.Update(info);
             await _unitOfWork.CommitAsync();
         }
-        public async Task<IEnumerable<ContactInfo>> GetDeleteFilteredAllContacts()
+        public async Task<IEnumerable<ContactInfo>> GetDeleteFilteredAllContactInfos()
         {
             return await _unitOfWork.ContactInfo.GetDeleteFilteredAll();
         }

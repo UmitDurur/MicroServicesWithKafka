@@ -32,6 +32,23 @@ namespace ContactMicroService.WebApi.Controllers
                 return new Response<IEnumerable<ContactInfo>>().NotFound("Contact info cannot found.");
             }
         }
+
+        [HttpGet("[action]")]
+        public async Task<Response<IEnumerable<ContactInfo>>> GetDeleteFilteredAllData()
+        {
+            try
+            {
+                var contactInfos = await _contactInfoService.GetDeleteFilteredAllContactInfos();
+                return new Response<IEnumerable<ContactInfo>>().Ok(contactInfos.Count(), contactInfos);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return new Response<IEnumerable<ContactInfo>>().NotFound("ContactInfo cannot found.");
+            }
+        }
+
+
         [HttpPost("[action]/{id}")]
         public async Task<Response<ContactInfo>> GetById(int id)
         {
