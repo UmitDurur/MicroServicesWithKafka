@@ -34,6 +34,21 @@ namespace ReportMicroService.WebApi.Controllers
             }
         }
 
+        [HttpGet("[action]")]
+        public async Task<Response<IEnumerable<Report>>> GetDeleteFilteredAllData()
+        {
+            try
+            {
+                var reports = await _reportService.GetDeleteFilteredAllReports();
+                return new Response<IEnumerable<Report>>().Ok(reports.Count(), reports);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return new Response<IEnumerable<Report>>().NotFound("Report cannot found.");
+            }
+        }
+
 
         [HttpPost("[action]")]
         public async Task<Response<Report>> CreateOrUpdate(Report report)
@@ -51,23 +66,28 @@ namespace ReportMicroService.WebApi.Controllers
             }
         }
 
+
         [HttpPost("[action]/{id}")]
-        public async Task Delete(int id)
+        public async Task<Response<Report>> Delete(int id)
         {
             try
             {
                 if (id != 0)
                 {
                     var deleteData = await _reportService.GetReportById(id);
-
-                    await _reportService.DeleteReport(deleteData);
+                    deleteData.IsDeleted = true;
+                    await _reportService.UpdateReport(deleteData);
+                    return new Response<Report>().Ok(1, null);
                 }
+
+                return new Response<Report>().NotFound("Report can not found");
+
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
+                return new Response<Report>().NotFound("Delete report failed");
             }
-
         }
 
         [HttpPost("[action]/{id}")]

@@ -43,6 +43,11 @@ namespace ReportMicroService.Bussiness.Concrete
             return await _unitOfWork.Report.GetAllAsync();
         }
 
+        public async Task<IEnumerable<Report>> GetDeleteFilteredAllReports()
+        {
+            return await _unitOfWork.Report.GetDeleteFilteredAll();
+        }
+
         public async Task<Report> GetReportById(int id)
         {
             return await _unitOfWork.Report.GetByIdAsync(id);
