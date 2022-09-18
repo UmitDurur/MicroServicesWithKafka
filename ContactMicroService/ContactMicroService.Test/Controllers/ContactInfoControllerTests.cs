@@ -76,24 +76,6 @@ namespace ContactMicroService.Test.Controllers
             Assert.Equal(HttpStatusCode.NotFound, statusCode);
         }
 
-        [Fact]
-        public void GetContact_GetById_ContactInfoExistInRepo()
-        {
-            var contactInfos = _mockContactInfo.GetContactInfos();
-            _contactInfoService.Setup(x => x.GetContactInfoById(1))
-                .ReturnsAsync(contactInfos[0]);
-            var controller = new ContactInfoController(_contactInfoService.Object, logger.Object);
-
-            var actionResult = controller.GetById(1);
-            var result = actionResult.Result;
-            var statusCode = result.Code;
-            var actual = result.Data as ContactInfo;
-
-            var expected = contactInfos[0];
-
-            Assert.Equal(HttpStatusCode.OK, statusCode);
-            Assert.Equal(expected, actual);
-        }
 
         [Fact]
         public void GetContactInfoById_ContactInfoObject_ContactInfowithSpecificeIdExists()
@@ -131,34 +113,94 @@ namespace ContactMicroService.Test.Controllers
             Assert.Equal(HttpStatusCode.NotFound, statusCode);
 
         }
+        [Fact]
+        public void GetContactInfoById_shouldReturnBadRequest_SendZeroAsContactInfoId()
+        {
+            var contactInfo = (_mockContactInfo.GetContactInfos())[0];
+            _contactInfoService.Setup(x => x.GetContactInfoById(It.IsAny<int>()))
+                .ReturnsAsync(contactInfo);
+            var controller = new ContactInfoController(_contactInfoService.Object, logger.Object);
+
+            var actionResult = controller.GetById(0);
+            var result = actionResult.Result;
+            var statusCode = result.Code;
+
+            Assert.IsType<HttpStatusCode>(statusCode);
+            Assert.Equal(HttpStatusCode.NotFound, statusCode);
+
+        }
 
         [Fact]
         public void CreateContactInfo_CreatedStatus_PassingContactInfoObjectToCreate()
         {
             var contactInfos = _mockContactInfo.GetContactInfos();
             var newContactInfo = contactInfos[0];
-            newContactInfo.ContactId = 0;
+            newContactInfo.ContactInfoId = 0;
+            _contactInfoService.Setup(x => x.CreateContactInfo(It.IsAny<ContactInfo>()));
             var controller = new ContactInfoController(_contactInfoService.Object, logger.Object);
             var actionResult = controller.CreateOrUpdate(newContactInfo);
             var result = actionResult.Result;
             Assert.IsType<HttpStatusCode>(result.Code);
             Assert.Equal(HttpStatusCode.OK, result.Code);
-            Assert.Equal(newContactInfo, result.Data);
+            _contactInfoService.Verify(x => x.CreateContactInfo(newContactInfo), Times.Once);
         }
 
 
         [Fact]
-        public void UpdateContact_UpdatedStatus_PassingContactObjectToUpdate()
+        public void UpdateContactInfo_UpdatedStatus_PassingContactInfoObjectToUpdate()
         {
             var contactInfos = _mockContactInfo.GetContactInfos();
             var newContactInfo = contactInfos[0];
-            newContactInfo.Information = "Adana";
+            _contactInfoService.Setup(x => x.UpdateContactInfo(It.IsAny<ContactInfo>()));
             var controller = new ContactInfoController(_contactInfoService.Object, logger.Object);
             var actionResult = controller.CreateOrUpdate(newContactInfo);
             var result = actionResult.Result;
             Assert.IsType<HttpStatusCode>(result.Code);
             Assert.Equal(HttpStatusCode.OK, result.Code);
-            Assert.Equal(newContactInfo, result.Data);
+            _contactInfoService.Verify(x => x.UpdateContactInfo(newContactInfo), Times.Once);
+
+        }
+
+        [Fact]
+        public void DeleteContactInfo_DeletedStatus_PassingContactInfoIdToDelete()
+        {
+            var contactInfos = _mockContactInfo.GetContactInfos();
+            var deleteContactInfo = contactInfos[0];
+            _contactInfoService.Setup(x => x.GetContactInfoById(deleteContactInfo.ContactInfoId)).ReturnsAsync(deleteContactInfo);
+            _contactInfoService.Setup(x => x.UpdateContactInfo(It.IsAny<ContactInfo>()));
+            var controller = new ContactInfoController(_contactInfoService.Object, logger.Object);
+            var actionResult = controller.Delete(deleteContactInfo.ContactInfoId);
+            var result = actionResult.Result;
+            _contactInfoService.Verify(x => x.UpdateContactInfo(It.IsAny<ContactInfo>()), Times.Once);
+            Assert.Equal(HttpStatusCode.OK, result.Code);
+
+        }
+
+        [Fact]
+        public void DeleteContactInfo_DeletedStatusFailed_PassingContactInfoIdToDelete()
+        {
+            var contactInfos = _mockContactInfo.GetContactInfos();
+            var deleteContactInfo = contactInfos[0];
+            _contactInfoService.Setup(x => x.GetContactInfoById(deleteContactInfo.ContactInfoId)).ReturnsAsync((ContactInfo)null);
+            var controller = new ContactInfoController(_contactInfoService.Object, logger.Object);
+            var actionResult = controller.Delete(deleteContactInfo.ContactInfoId);
+            var result = actionResult.Result;
+
+            Assert.Equal(HttpStatusCode.NotFound, result.Code);
+
+        }
+
+        [Fact]
+        public void DeleteContactInfo_DeletedStatusFailed_PassingZeroToDelete()
+        {
+            var contactInfos = _mockContactInfo.GetContactInfos();
+            var deleteContactInfo = contactInfos[0];
+            _contactInfoService.Setup(x => x.GetContactInfoById(It.IsAny<int>())).ReturnsAsync((ContactInfo)null);
+            var controller = new ContactInfoController(_contactInfoService.Object, logger.Object);
+            var actionResult = controller.Delete(0);
+            var result = actionResult.Result;
+
+            Assert.Equal(HttpStatusCode.NotFound, result.Code);
 
         }
     }

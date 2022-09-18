@@ -77,7 +77,7 @@ namespace ContactMicroService.Test.Controllers
             var actual = result.Data as IEnumerable<Contact>;
 
             Assert.Equal(HttpStatusCode.OK, statusCode);
-            Assert.Equal(_mockContact.GetContacts().Count(), actual.Count());
+            Assert.Equal(contacts.Count(), actual.Count());
         }
         [Fact]
         public void GetContact_ListOfContact_ContactIfNotExistsInRepoIsNotDeleted()
@@ -95,27 +95,10 @@ namespace ContactMicroService.Test.Controllers
         }
 
 
-        [Fact]
-        public void GetContact_GetById_ContactExistInRepo()
-        {
-            var contacts = _mockContact.GetContacts();
-            _contactService.Setup(x => x.GetContactById(1))
-                .ReturnsAsync(contacts[0]);
-            var controller = new ContactController(_contactService.Object, logger.Object);
-
-            var actionResult = controller.GetById(1);
-            var result = actionResult.Result;
-            var statusCode = result.Code;
-            var actual = result.Data as Contact;
-
-            var expected = _mockContact.GetById(1);
-
-            Assert.Equal(HttpStatusCode.OK, statusCode);
-            Assert.Equal(expected, actual);
-        }
+       
 
         [Fact]
-        public void GetContactById_ContactObject_ContactwithSpecificeIdExists()
+        public void GetContactById_ContactObject_ContactwithSpecifiedIdExists()
         {
             var contacts = _mockContact.GetContacts();
             var expected = contacts[0];
@@ -149,6 +132,23 @@ namespace ContactMicroService.Test.Controllers
             Assert.Equal(HttpStatusCode.NotFound, statusCode);
 
         }
+        [Fact]
+        public void GetContactById_shouldReturnBadRequest_SendZeroAsContactId()
+        {
+            var contact = (_mockContact.GetContacts())[0];
+            _contactService.Setup(x => x.GetContactById(It.IsAny<int>()))
+                .ReturnsAsync(contact);
+            var controller = new ContactController(_contactService.Object, logger.Object);
+
+            var actionResult = controller.GetById(0);
+            var result = actionResult.Result;
+            var statusCode = result.Code;
+
+            Assert.IsType<HttpStatusCode>(statusCode);
+            Assert.Equal(HttpStatusCode.NotFound, statusCode);
+
+        }
+
 
         [Fact]
         public void CreateContact_CreatedStatus_PassingContactObjectToCreate()
@@ -156,12 +156,13 @@ namespace ContactMicroService.Test.Controllers
             var contacts = _mockContact.GetContacts();
             var newContact = contacts[0];
             newContact.ContactId = 0;
+            _contactService.Setup(x => x.CreateContact(It.IsAny<Contact>()));
             var controller = new ContactController(_contactService.Object, logger.Object);
             var actionResult = controller.CreateOrUpdate(newContact);
             var result = actionResult.Result;
             Assert.IsType<HttpStatusCode>(result.Code);
             Assert.Equal(HttpStatusCode.OK, result.Code);
-            Assert.Equal(newContact,result.Data);
+            _contactService.Verify(x => x.CreateContact(newContact), Times.Once);
         }
   
 
@@ -189,29 +190,54 @@ namespace ContactMicroService.Test.Controllers
         {
             var contacts = _mockContact.GetContacts();
             var newContact = contacts[0];
-            newContact.Company = "NewComp";
+            _contactService.Setup(x=>x.UpdateContact(It.IsAny<Contact>()));
             var controller = new ContactController(_contactService.Object, logger.Object);
             var actionResult = controller.CreateOrUpdate(newContact);
             var result = actionResult.Result;
             Assert.IsType<HttpStatusCode>(result.Code);
             Assert.Equal(HttpStatusCode.OK, result.Code);
-            Assert.Equal(newContact, result.Data);
+            _contactService.Verify(x=>x.UpdateContact(newContact),Times.Once);
 
         }
-
+        [Fact]
         public void DeleteContact_DeletedStatus_PassingContactIdToDelete()
         {
             var contacts = _mockContact.GetContacts();
             var deleteContact = contacts[0];
-            
+            _contactService.Setup(x => x.GetContactById(deleteContact.ContactId)).ReturnsAsync(deleteContact);
+            _contactService.Setup(x => x.UpdateContact(It.IsAny<Contact>()));
             var controller = new ContactController(_contactService.Object, logger.Object);
             var actionResult = controller.Delete(deleteContact.ContactId);
             var result = actionResult.Result;
-            
+            _contactService.Verify(x=>x.UpdateContact(It.IsAny<Contact>()),Times.Once);
             Assert.Equal(HttpStatusCode.OK, result.Code);
 
         }
+        [Fact]
+        public void DeleteContact_DeletedStatusFailed_PassingContactIdToDelete()
+        {
+            var contacts = _mockContact.GetContacts();
+            var deleteContact = contacts[0];
+            _contactService.Setup(x => x.GetContactById(deleteContact.ContactId)).ReturnsAsync((Contact)null);
+            var controller = new ContactController(_contactService.Object, logger.Object);
+            var actionResult = controller.Delete(deleteContact.ContactId);
+            var result = actionResult.Result;
 
+            Assert.Equal(HttpStatusCode.NotFound, result.Code);
+
+        }
+        [Fact]
+
+        public void DeleteContact_DeletedStatusFailed_PassingZeroToDelete()
+        {
+            _contactService.Setup(x => x.GetContactById(It.IsAny<int>())).ReturnsAsync((Contact)null);
+            var controller = new ContactController(_contactService.Object, logger.Object);
+            var actionResult = controller.Delete(0);
+            var result = actionResult.Result;
+
+            Assert.Equal(HttpStatusCode.NotFound, result.Code);
+
+        }
 
     }
 }
