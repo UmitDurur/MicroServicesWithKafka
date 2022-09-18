@@ -5,7 +5,6 @@ using ReportMicroService.Bussiness.Abstract;
 using ReportMicroService.Bussiness.Concrete;
 using ReportMicroService.Entities.Model;
 using ReportMicroService.Entities.Repositories;
-using ReportMicroService.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;

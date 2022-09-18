@@ -216,5 +216,31 @@ namespace ReportMicroService.Test.Controllers
 
         }
 
+
+
+        [Fact]
+        public void RequestReport_ReportObject_PassingRequestObjectToReport()
+        {
+            var location = "Hatay";
+            _reportService.Setup(x => x.RequestReport(It.IsAny<string>())).ReturnsAsync(new Report());
+            var controller = new ReportController(_reportService.Object, logger.Object);
+            var actionResult = controller.RequestReport(location);
+            var result = actionResult.Result;
+            Assert.IsType<HttpStatusCode>(result.Code);
+            Assert.Equal(HttpStatusCode.OK, result.Code);
+            _reportService.Verify(x => x.RequestReport(location), Times.Once);
+        }
+
+        [Fact]
+        public void RequestReport_ShouldReturnBadRequest_PassingnullObjectToReport()
+        {
+            var location = "Hatay";
+            _reportService.Setup(x => x.RequestReport(It.IsAny<string>())).ReturnsAsync(new Report());
+            var controller = new ReportController(_reportService.Object, logger.Object);
+            var actionResult = controller.RequestReport((string)null);
+            var result = actionResult.Result;
+            Assert.IsType<HttpStatusCode>(result.Code);
+            Assert.Equal(HttpStatusCode.NotFound, result.Code);
+        }
     }
 }

@@ -99,8 +99,8 @@ namespace ReportMicroService.WebApi.Controllers
                 if (id != 0)
                 {
                     var report = await _reportService.GetReportById(id);
-                    if(report!=null)
-                    return new Response<Report>().Ok(1, report);
+                    if (report != null)
+                        return new Response<Report>().Ok(1, report);
                     else return new Response<Report>().NotFound("Report cannot found.");
                 }
                 else
@@ -114,16 +114,22 @@ namespace ReportMicroService.WebApi.Controllers
 
         }
         [HttpPost("[action]")]
-        public async Task RequestReport(string Location)
+        public async Task<Response<Report>> RequestReport(string Location)
         {
             try
             {
                 if (!string.IsNullOrWhiteSpace(Location))
-                    await _reportService.RequestReport(Location);
+                {
+                    var report =await _reportService.RequestReport(Location);
+                    return new Response<Report>().Ok(1, report);
+                }
+                return new Response<Report>().NotFound();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
+
+                return new Response<Report>().NotFound();
             }
         }
 
