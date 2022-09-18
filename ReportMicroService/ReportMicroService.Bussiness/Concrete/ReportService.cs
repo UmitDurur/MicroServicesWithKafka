@@ -32,12 +32,6 @@ namespace ReportMicroService.Bussiness.Concrete
             return report;
         }
 
-        public async Task DeleteReport(Report report)
-        {
-            _unitOfWork.Report.Remove(report);
-            await _unitOfWork.CommitAsync();
-        }
-
         public async Task<IEnumerable<Report>> GetAllReports()
         {
             return await _unitOfWork.Report.GetAllAsync();
